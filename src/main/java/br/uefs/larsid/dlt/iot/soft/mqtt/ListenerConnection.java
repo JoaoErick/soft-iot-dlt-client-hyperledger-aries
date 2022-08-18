@@ -80,6 +80,7 @@ public class ListenerConnection implements IMqttMessageListener {
       case CONNECT:
         printlnDebug("CREATE_INVITATION...");
         this.controllerImpl.addNodeUri(msg);
+        
         sendToControllerAries(CREATE_INVITATION, "");
 
         break;
@@ -90,15 +91,6 @@ public class ListenerConnection implements IMqttMessageListener {
       case CREATE_INVITATION_RES:
         printlnDebug("CREATE_INVITATION_RES...");
         printlnDebug(msg);
-        // // Removendo Ip e Porta da URL
-        // msg = msg.substring(msg.indexOf("=") + 1);
-        // printlnDebug(msg);
-
-        // byte[] decodedBytes = Base64.getDecoder().decode(msg);
-        // String decodedString = new String(decodedBytes);
-
-        // JsonObject jsonResponse = new Gson().fromJson(decodedString,
-        // JsonObject.class);
 
         publishToDown(SEND_INVITATION, msg.getBytes());
 
