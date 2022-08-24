@@ -3,6 +3,7 @@ package br.uefs.larsid.dlt.iot.soft.model;
 import br.uefs.larsid.dlt.iot.soft.entity.Device;
 import br.uefs.larsid.dlt.iot.soft.entity.Sensor;
 import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerConnection;
+import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerCredentialDefinition;
 import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerInvitation;
 // import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerRequest;
 // import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerResponse;
@@ -42,8 +43,13 @@ public class ControllerImpl implements Controller {
   private static final String DISCONNECT = "FIN";
   /*--------------------------------------------------------------------------*/
 
+  /* -------------------------- Aries Topic constants ----------------------- */
+  private static final String CREDENTIAL_DEFINITIONS = "POST CREDENTIAL_DEFINITIONS";
+  /* ----------------------------------------------------------------------- */
+
   /* -------------------------- Aries Topic Res constants ------------------ */
   private static final String CREATE_INVITATION_RES = "CREATE_INVITATION_RES";
+  private static final String CREDENTIAL_DEFINITIONS_RES = "CREDENTIAL_DEFINITIONS_RES";
   /* ----------------------------------------------------------------------- */
 
   /* -------------------------- Nodes Topic constants -----------------------*/
@@ -69,19 +75,9 @@ public class ControllerImpl implements Controller {
 
     if (hasNodes) {
       nodesUris = new ArrayList<>();
-      // String[] topicsRequest = { TOP_K_FOG, SENSORS_FOG };
       String[] topicsConnection = { CONNECT, DISCONNECT, CREATE_INVITATION_RES };
-      // String[] topicsResponse = { TOP_K_RES, INVALID_TOP_K, SENSORS_RES };
+      String[] topicsCredentialDefinition = { CREDENTIAL_DEFINITIONS_RES };
 
-      // new ListenerRequest(
-      //   this,
-      //   MQTTClientUp,
-      //   MQTTClientHost,
-      //   this.nodesUris,
-      //   topicsRequest,
-      //   QOS,
-      //   debugModeValue
-      // );
       new ListenerConnection(
         this,
         MQTTClientHost,
@@ -90,20 +86,23 @@ public class ControllerImpl implements Controller {
         QOS,
         debugModeValue
       );
-      // new ListenerResponse(
-      //   this,
-      //   MQTTClientHost,
-      //   topicsResponse,
-      //   QOS,
-      //   debugModeValue
-      // );
+
+      new ListenerCredentialDefinition(
+        MQTTClientHost,
+        topicsCredentialDefinition,
+        QOS,
+        debugModeValue
+      );
+
+      byte[] payload = "".getBytes();
+
+      this.MQTTClientHost.publish(CREDENTIAL_DEFINITIONS, payload, QOS);
+      
     } else {
       String[] topics = { SEND_INVITATION };
 
       new ListenerInvitation(
-        this,
         MQTTClientHost,
-        MQTTClientUp,
         topics,
         QOS,
         debugModeValue

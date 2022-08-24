@@ -20,14 +20,10 @@ public class ListenerConnection implements IMqttMessageListener {
 
   /* -------------------------- Aries Topic constants ----------------------- */
   private static final String CREATE_INVITATION = "POST CREATE_INVITATION";
-  private static final String CREDENTIAL_DEFINITIONS = "POST CREDENTIAL_DEFINITIONS";
-  private static final String ISSUE_CREDENTIAL = "POST ISSUE_CREDENTIAL";
   /* ----------------------------------------------------------------------- */
 
   /* -------------------------- Aries Topic Res constants ------------------ */
   private static final String CREATE_INVITATION_RES = "CREATE_INVITATION_RES";
-  private static final String CREDENTIAL_DEFINITIONS_RES = "CREDENTIAL_DEFINITIONS_RES";
-  private static final String ISSUE_CREDENTIAL_RES = "ISSUE_CREDENTIAL_RES";
   /* ----------------------------------------------------------------------- */
 
   /* -------------------------- Nodes Topic constants ----------------------- */
@@ -80,7 +76,7 @@ public class ListenerConnection implements IMqttMessageListener {
       case CONNECT:
         printlnDebug("CREATE_INVITATION...");
         this.controllerImpl.addNodeUri(msg);
-        
+
         sendToControllerAries(CREATE_INVITATION, "");
 
         break;

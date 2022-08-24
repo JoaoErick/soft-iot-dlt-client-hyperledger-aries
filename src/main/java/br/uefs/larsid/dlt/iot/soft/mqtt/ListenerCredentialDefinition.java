@@ -3,20 +3,10 @@ package br.uefs.larsid.dlt.iot.soft.mqtt;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-public class ListenerInvitation implements IMqttMessageListener {
-
-  /* -------------------------- Aries Topic constants ----------------------- */
-  private static final String ACCEPT_INVITATION = "POST ACCEPT_INVITATION";
-  private static final String ISSUE_CREDENTIAL = "POST ISSUE_CREDENTIAL";
-  /* ----------------------------------------------------------------------- */
+public class ListenerCredentialDefinition implements IMqttMessageListener {
 
   /* -------------------------- Aries Topic Res constants ------------------ */
   private static final String CREDENTIAL_DEFINITIONS_RES = "CREDENTIAL_DEFINITIONS_RES";
-  private static final String ISSUE_CREDENTIAL_RES = "ISSUE_CREDENTIAL_RES";
-  /* ----------------------------------------------------------------------- */
-
-  /* -------------------------- Nodes Topic constants ----------------------- */
-  private static final String SEND_INVITATION = "POST SEND_INVITATION";
   /* ----------------------------------------------------------------------- */
 
   private static final int QOS = 1;
@@ -32,7 +22,7 @@ public class ListenerInvitation implements IMqttMessageListener {
    * @param qos            int - Qualidade de serviço do tópico que será ouvido.
    * @param debugModeValue boolean - Modo para debugar o código.
    */
-  public ListenerInvitation(
+  public ListenerCredentialDefinition(
       MQTTClient MQTTClientHost,
       String[] topics,
       int qos,
@@ -51,13 +41,14 @@ public class ListenerInvitation implements IMqttMessageListener {
     final String[] params = topic.split("/");
     String msg = new String(message.getPayload());
 
-    printlnDebug("==== Receive Invitation Request ====");
+    printlnDebug("==== Receive Crendential Definition Request ====");
 
     /* Verificar qual o tópico recebido. */
     switch (params[0]) {
-      case SEND_INVITATION:
-        printlnDebug("SEND_INVITATION...");
-        sendToControllerAries(ACCEPT_INVITATION, msg);
+      case CREDENTIAL_DEFINITIONS_RES:
+        printlnDebug("CREDENTIAL_DEFINITIONS_RES...");
+        
+        printlnDebug("Crendential Definition configured!");
 
         break;
     }
