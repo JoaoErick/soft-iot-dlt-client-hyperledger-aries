@@ -5,5 +5,5 @@ O `soft-iot-dlt-client-hyperledger-aries` é o *bundle* genérico que pode atuar
 ### Modelo da arquitetura
 
 <p align="center">
-  <img src="./assets/decentralized-identity-soft-iot.png" width="580px" />
+  <img src="./assets/Decentralized-identity-soft-iot.png" width="580px" />
 </p>
