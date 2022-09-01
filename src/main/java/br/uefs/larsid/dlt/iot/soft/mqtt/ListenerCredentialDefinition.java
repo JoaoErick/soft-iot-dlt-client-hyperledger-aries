@@ -3,6 +3,8 @@ package br.uefs.larsid.dlt.iot.soft.mqtt;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import br.uefs.larsid.dlt.iot.soft.services.Controller;
+
 public class ListenerCredentialDefinition implements IMqttMessageListener {
 
   /* -------------------------- Aries Topic Res constants ------------------ */
@@ -12,21 +14,25 @@ public class ListenerCredentialDefinition implements IMqttMessageListener {
   private static final int QOS = 1;
 
   private boolean debugModeValue;
+  private Controller controllerImpl;
   private MQTTClient MQTTClientHost;
 
   /**
    * Método Construtor.
    *
+   * @param controllerImpl Controller - Controller que fará uso desse Listener.
    * @param MQTTClientHost MQTTClient - Cliente MQTT do gateway inferior.
    * @param topics         String[] - Tópicos que serão assinados.
    * @param qos            int - Qualidade de serviço do tópico que será ouvido.
    * @param debugModeValue boolean - Modo para debugar o código.
    */
   public ListenerCredentialDefinition(
+      Controller controllerImpl,
       MQTTClient MQTTClientHost,
       String[] topics,
       int qos,
       boolean debugModeValue) {
+    this.controllerImpl = controllerImpl;
     this.MQTTClientHost = MQTTClientHost;
     this.debugModeValue = debugModeValue;
 
@@ -47,8 +53,10 @@ public class ListenerCredentialDefinition implements IMqttMessageListener {
     switch (params[0]) {
       case CREDENTIAL_DEFINITIONS_RES:
         printlnDebug("CREDENTIAL_DEFINITIONS_RES...");
-        
+
         printlnDebug("Crendential Definition configured!");
+
+        this.controllerImpl.setCrendentialDefinitionIsConfigured(true);
 
         break;
     }
