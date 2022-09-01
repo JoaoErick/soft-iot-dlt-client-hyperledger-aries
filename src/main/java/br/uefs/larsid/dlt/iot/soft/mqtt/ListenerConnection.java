@@ -42,6 +42,7 @@ public class ListenerConnection implements IMqttMessageListener {
    *
    * @param controllerImpl Controller - Controller que fará uso desse Listener.
    * @param MQTTClientHost MQTTClient - Cliente MQTT do gateway inferior.
+   * @param MQTTClientUp MQTTClient - Cliente MQTT do gateway superior.
    * @param topics         String[] - Tópicos que serão assinados.
    * @param qos            int - Qualidade de serviço do tópico que será ouvido.
    * @param debugModeValue boolean - Modo para debugar o código.
@@ -77,7 +78,7 @@ public class ListenerConnection implements IMqttMessageListener {
         printlnDebug("CREATE_INVITATION...");
         this.controllerImpl.addNodeUri(msg);
 
-        sendToControllerAries(CREATE_INVITATION, "");
+        sendToControllerAries(CREATE_INVITATION, msg);
 
         break;
       case DISCONNECT:
@@ -88,7 +89,16 @@ public class ListenerConnection implements IMqttMessageListener {
         printlnDebug("CREATE_INVITATION_RES...");
         printlnDebug(msg);
 
-        publishToDown(SEND_INVITATION, msg.getBytes());
+        JsonObject jsonProperties = new Gson().fromJson(msg, JsonObject.class);
+        String invitationURL = jsonProperties.get("invitationURL").getAsString();
+        String nodeUri = jsonProperties.get("nodeUri").getAsString();
+        String connectionId = jsonProperties.get("connectionId").getAsString();
+
+        this.controllerImpl.addConnectionIdNodes(nodeUri, connectionId);
+
+        printlnDebug(nodeUri);
+
+        publishToDown(SEND_INVITATION, invitationURL.getBytes());
 
         break;
     }
