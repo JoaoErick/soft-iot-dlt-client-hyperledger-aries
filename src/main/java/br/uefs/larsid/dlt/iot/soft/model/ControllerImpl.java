@@ -9,46 +9,29 @@ import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerInvitation;
 // import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerResponse;
 import br.uefs.larsid.dlt.iot.soft.mqtt.MQTTClient;
 import br.uefs.larsid.dlt.iot.soft.services.Controller;
-import br.uefs.larsid.dlt.iot.soft.utils.MapToArray;
-import br.uefs.larsid.dlt.iot.soft.utils.SortTopK;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class ControllerImpl implements Controller {
 
-  /*-------------------------Constantes---------------------------------------*/
+  /*--------------------------Constants-------------------------------------*/
   private static final int QOS = 1;
-  // private static final String TOP_K_FOG = "GET topk";
-  // private static final String TOP_K = "TOP_K_HEALTH/#";
-  // private static final String SENSORS_FOG = "GET sensors";
-  // private static final String SENSORS = "SENSORS";
-  // private static final String TOP_K_RES_FOG = "TOP_K_HEALTH_FOG_RES/";
-  // private static final String SENSORS_FOG_RES = "SENSORS_FOG_RES/";
-  // private static final String SENSORS_RES = "SENSORS_RES/";
-  // private static final String TOP_K_RES = "TOP_K_HEALTH_RES/#";
-  // private static final String INVALID_TOP_K = "INVALID_TOP_K/#";
-  // private static final String INVALID_TOP_K_FOG = "INVALID_TOP_K_FOG/";
+  
   private static final String CONNECT = "SYN";
   private static final String DISCONNECT = "FIN";
-  /*--------------------------------------------------------------------------*/
+  /*-------------------------------------------------------------------------*/
 
-  /* -------------------------- Aries Topic constants ----------------------- */
+  /* -------------------------- Aries Topic constants ---------------------- */
   private static final String CREDENTIAL_DEFINITIONS = "POST CREDENTIAL_DEFINITIONS";
   /* ----------------------------------------------------------------------- */
 
   /* -------------------------- Aries Topic Res constants ------------------ */
   private static final String CREATE_INVITATION_RES = "CREATE_INVITATION_RES";
+  private static final String ACCEPT_INVITATION_RES = "ACCEPT_INVITATION_RES";
+  private static final String ACCEPT_INVITATION_FOG_RES = "ACCEPT_INVITATION_FOG_RES";
   private static final String CREDENTIAL_DEFINITIONS_RES = "CREDENTIAL_DEFINITIONS_RES";
   /* ----------------------------------------------------------------------- */
 
@@ -63,6 +46,16 @@ public class ControllerImpl implements Controller {
   private List<String> nodesUris;
   private int timeoutInSeconds;
   private JsonObject sensorsTypesJSON = new JsonObject();
+  private boolean crendentialDefinitionIsConfigured = false;
+  private Map<String, String> connectionIdNodes = new LinkedHashMap<String, String>();
+
+  public Map<String, String> getConnectionIdNodes() {
+    return connectionIdNodes;
+  }
+
+  public void addConnectionIdNodes(String nodeUri, String connectionId) {
+    this.connectionIdNodes.put(nodeUri, connectionId);
+  }
 
   public ControllerImpl() {}
 
@@ -77,6 +70,7 @@ public class ControllerImpl implements Controller {
       nodesUris = new ArrayList<>();
       String[] topicsConnection = { CONNECT, DISCONNECT, CREATE_INVITATION_RES };
       String[] topicsCredentialDefinition = { CREDENTIAL_DEFINITIONS_RES };
+      String[] topicsInvitation = { ACCEPT_INVITATION_FOG_RES };
 
       new ListenerConnection(
         this,
@@ -88,8 +82,18 @@ public class ControllerImpl implements Controller {
       );
 
       new ListenerCredentialDefinition(
+        this,
         MQTTClientHost,
         topicsCredentialDefinition,
+        QOS,
+        debugModeValue
+      );
+
+      new ListenerInvitation(
+        this,
+        MQTTClientHost,
+        MQTTClientUp,
+        topicsInvitation,
         QOS,
         debugModeValue
       );
@@ -99,10 +103,12 @@ public class ControllerImpl implements Controller {
       this.MQTTClientHost.publish(CREDENTIAL_DEFINITIONS, payload, QOS);
       
     } else {
-      String[] topics = { SEND_INVITATION };
+      String[] topics = { SEND_INVITATION, ACCEPT_INVITATION_RES };
 
       new ListenerInvitation(
+        this,
         MQTTClientHost,
+        MQTTClientUp,
         topics,
         QOS,
         debugModeValue
@@ -628,6 +634,14 @@ public class ControllerImpl implements Controller {
 
   public void setHasNodes(boolean hasNodes) {
     this.hasNodes = hasNodes;
+  }
+
+  public boolean crendentialDefinitionIsConfigured() {
+    return crendentialDefinitionIsConfigured;
+  }
+
+  public void setCrendentialDefinitionIsConfigured(boolean crendentialDefinitionIsConfigured) {
+    this.crendentialDefinitionIsConfigured = crendentialDefinitionIsConfigured;
   }
 
   public void setTimeoutInSeconds(int timeoutInSeconds) {
