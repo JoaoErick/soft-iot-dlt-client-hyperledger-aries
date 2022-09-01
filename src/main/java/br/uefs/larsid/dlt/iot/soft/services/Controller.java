@@ -1,6 +1,7 @@
 package br.uefs.larsid.dlt.iot.soft.services;
 
 import java.util.List;
+import java.util.Map;
 
 public interface Controller {
   /**
@@ -150,6 +151,21 @@ public interface Controller {
    */
   public void publishSensorType();
 
+  /**
+   * Verifica se a definição de credencial já está configurada.
+   * @return boolean
+   */
+  public boolean crendentialDefinitionIsConfigured();
+
+  /**
+   * Altera o indicador que informa se a definição de credencial já está 
+   * configurada ou não.
+   */
+  public void setCrendentialDefinitionIsConfigured(boolean crendentialDefinitionIsConfigured);
+
+  public Map<String, String> getConnectionIdNodes();
+
+  public void addConnectionIdNodes(String nodeUri, String connectionId);
   /**
    * Adiciona os sensores em um JSON para enviar para a camada superior.
    *
