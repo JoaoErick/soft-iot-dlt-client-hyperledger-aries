@@ -27,6 +27,7 @@ public class ListenerInvitation implements IMqttMessageListener {
   /* ----------------------------------------------------------------------- */
 
   private static final int QOS = 1;
+  private static final int TIMEOUT_IN_SECONDS = 25;
 
   private boolean debugModeValue;
   private Controller controllerImpl;
@@ -88,13 +89,25 @@ public class ListenerInvitation implements IMqttMessageListener {
       case ACCEPT_INVITATION_FOG_RES:
         printlnDebug("ACCEPT_INVITATION_FOG_RES...");
 
-        String json = 
-        "{" + 
-          "\"value\":\"" + msg.split(":")[0] + "\"," + 
-          "\"connectionId\":\"" + this.controllerImpl.getConnectionIdNodes().get(msg) + "\"" +
-        "}";
-        printlnDebug("ConnectionId do ip recebido: " + this.controllerImpl.getConnectionIdNodes().get(msg));
-        printlnDebug("json: " + json);
+        String json = "{" +
+            "\"value\":\"" + msg.split(":")[0] + "\"," +
+            "\"connectionId\":\"" + this.controllerImpl.getConnectionIdNodes().get(msg) + "\"" +
+            "}";
+        printlnDebug("\nReceived connection id: " + this.controllerImpl.getConnectionIdNodes().get(msg));
+
+        long start = System.currentTimeMillis();
+        long end = start + TIMEOUT_IN_SECONDS * 1000;
+
+        /*
+         * Aguarda um tempo necessário para que a conexão entre os agentes
+         * esteja realmente pronta.
+         */
+        while (System.currentTimeMillis() < end) {
+        }
+
+        printlnDebug("\nJSON of credential issuance: ");
+        printlnDebug(json);
+
         sendToControllerAries(ISSUE_CREDENTIAL, json);
 
         break;
@@ -104,10 +117,6 @@ public class ListenerInvitation implements IMqttMessageListener {
   private void sendToControllerAries(String topic, String message) {
     byte[] payload = message.getBytes();
     this.MQTTClientHost.publish(topic, payload, QOS);
-  }
-
-  private void publishToUp(String topicDown, String messageUp) {
-
   }
 
   private void printlnDebug(String str) {
