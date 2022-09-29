@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import br.uefs.larsid.dlt.iot.soft.services.Controller;
@@ -12,18 +13,16 @@ import br.uefs.larsid.dlt.iot.soft.services.Controller;
 public class ListenerInvitation implements IMqttMessageListener {
 
   /* -------------------------- Aries Topic constants ----------------------- */
-  private static final String ACCEPT_INVITATION = "POST ACCEPT_INVITATION";
   private static final String ISSUE_CREDENTIAL = "POST ISSUE_CREDENTIAL";
   /* ----------------------------------------------------------------------- */
 
   /* -------------------------- Aries Topic Res constants ------------------ */
+  private static final String CREATE_INVITATION_RES = "CREATE_INVITATION_RES";
   private static final String ACCEPT_INVITATION_RES = "ACCEPT_INVITATION_RES";
-  private static final String ACCEPT_INVITATION_FOG_RES = "ACCEPT_INVITATION_FOG_RES";
-  private static final String ISSUE_CREDENTIAL_RES = "ISSUE_CREDENTIAL_RES";
   /* ----------------------------------------------------------------------- */
 
   /* -------------------------- Nodes Topic constants ----------------------- */
-  private static final String SEND_INVITATION = "POST SEND_INVITATION";
+  private static final String CONNECT = "SYN";
   /* ----------------------------------------------------------------------- */
 
   private static final int QOS = 1;
@@ -71,28 +70,25 @@ public class ListenerInvitation implements IMqttMessageListener {
 
     /* Verificar qual o tópico recebido. */
     switch (params[0]) {
-      case SEND_INVITATION:
-        printlnDebug("SEND_INVITATION...");
-        sendToControllerAries(ACCEPT_INVITATION, msg);
+
+      case CREATE_INVITATION_RES:
+        printlnDebug("CREATE_INVITATION_RES...");
+        printlnDebug(msg);
+
+        JsonObject jsonProperties = new Gson().fromJson(msg, JsonObject.class);
+
+        this.MQTTClientUp.publish(CONNECT, jsonProperties.toString().getBytes(), QOS);
 
         break;
+
       case ACCEPT_INVITATION_RES:
         printlnDebug("ACCEPT_INVITATION_RES...");
-
-        String ip = this.MQTTClientHost.getIp();
-        String port = this.MQTTClientHost.getPort();
-        String uri = ip + ":" + port;
-
-        this.MQTTClientUp.publish(ACCEPT_INVITATION_FOG_RES, uri.getBytes(), QOS);
-
-        break;
-      case ACCEPT_INVITATION_FOG_RES:
-        printlnDebug("ACCEPT_INVITATION_FOG_RES...");
 
         String json = "{" +
             "\"value\":\"" + msg.split(":")[0] + "\"," +
             "\"connectionId\":\"" + this.controllerImpl.getConnectionIdNodes().get(msg) + "\"" +
-            "}";
+        "}";
+
         printlnDebug("\nReceived connection id: " + this.controllerImpl.getConnectionIdNodes().get(msg));
 
         long start = System.currentTimeMillis();

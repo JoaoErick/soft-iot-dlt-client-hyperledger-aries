@@ -19,15 +19,7 @@ public class ListenerConnection implements IMqttMessageListener {
   /*-------------------------------------------------------------------------*/
 
   /* -------------------------- Aries Topic constants ----------------------- */
-  private static final String CREATE_INVITATION = "POST CREATE_INVITATION";
-  /* ----------------------------------------------------------------------- */
-
-  /* -------------------------- Aries Topic Res constants ------------------ */
-  private static final String CREATE_INVITATION_RES = "CREATE_INVITATION_RES";
-  /* ----------------------------------------------------------------------- */
-
-  /* -------------------------- Nodes Topic constants ----------------------- */
-  private static final String SEND_INVITATION = "POST SEND_INVITATION";
+  private static final String ACCEPT_INVITATION = "POST ACCEPT_INVITATION";
   /* ----------------------------------------------------------------------- */
 
   private static final int QOS = 1;
@@ -75,30 +67,22 @@ public class ListenerConnection implements IMqttMessageListener {
     /* Verificar qual o tópico recebido. */
     switch (params[0]) {
       case CONNECT:
-        printlnDebug("CREATE_INVITATION...");
-        this.controllerImpl.addNodeUri(msg);
-
-        sendToControllerAries(CREATE_INVITATION, msg);
-
-        break;
-      case DISCONNECT:
-        this.controllerImpl.removeNodeUri(msg);
-
-        break;
-      case CREATE_INVITATION_RES:
-        printlnDebug("CREATE_INVITATION_RES...");
-        printlnDebug(msg);
-
+        printlnDebug("CONNECT...");
         JsonObject jsonProperties = new Gson().fromJson(msg, JsonObject.class);
-        String invitationURL = jsonProperties.get("invitationURL").getAsString();
+
         String nodeUri = jsonProperties.get("nodeUri").getAsString();
         String connectionId = jsonProperties.get("connectionId").getAsString();
 
         this.controllerImpl.addConnectionIdNodes(nodeUri, connectionId);
 
-        printlnDebug(nodeUri);
+        this.controllerImpl.addNodeUri(nodeUri);
 
-        publishToDown(SEND_INVITATION, invitationURL.getBytes());
+        sendToControllerAries(ACCEPT_INVITATION, jsonProperties.toString());
+
+        break;
+      case DISCONNECT:
+        printlnDebug("CONNECT...");
+        this.controllerImpl.removeNodeUri(msg);
 
         break;
     }

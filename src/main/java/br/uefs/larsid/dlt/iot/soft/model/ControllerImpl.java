@@ -1,14 +1,12 @@
 package br.uefs.larsid.dlt.iot.soft.model;
 
-import br.uefs.larsid.dlt.iot.soft.entity.Device;
-import br.uefs.larsid.dlt.iot.soft.entity.Sensor;
 import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerConnection;
 import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerCredentialDefinition;
 import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerInvitation;
-// import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerRequest;
-// import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerResponse;
 import br.uefs.larsid.dlt.iot.soft.mqtt.MQTTClient;
 import br.uefs.larsid.dlt.iot.soft.services.Controller;
+
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,17 +24,13 @@ public class ControllerImpl implements Controller {
 
   /* -------------------------- Aries Topic constants ---------------------- */
   private static final String CREDENTIAL_DEFINITIONS = "POST CREDENTIAL_DEFINITIONS";
+  private static final String CREATE_INVITATION = "POST CREATE_INVITATION";
   /* ----------------------------------------------------------------------- */
 
   /* -------------------------- Aries Topic Res constants ------------------ */
   private static final String CREATE_INVITATION_RES = "CREATE_INVITATION_RES";
   private static final String ACCEPT_INVITATION_RES = "ACCEPT_INVITATION_RES";
-  private static final String ACCEPT_INVITATION_FOG_RES = "ACCEPT_INVITATION_FOG_RES";
   private static final String CREDENTIAL_DEFINITIONS_RES = "CREDENTIAL_DEFINITIONS_RES";
-  /* ----------------------------------------------------------------------- */
-
-  /* -------------------------- Nodes Topic constants -----------------------*/
-  private static final String SEND_INVITATION = "POST SEND_INVITATION";
   /* ----------------------------------------------------------------------- */
 
   private boolean debugModeValue;
@@ -68,9 +62,9 @@ public class ControllerImpl implements Controller {
 
     if (hasNodes) {
       nodesUris = new ArrayList<>();
-      String[] topicsConnection = { CONNECT, DISCONNECT, CREATE_INVITATION_RES };
+      String[] topicsConnection = { CONNECT, DISCONNECT };
       String[] topicsCredentialDefinition = { CREDENTIAL_DEFINITIONS_RES };
-      String[] topicsInvitation = { ACCEPT_INVITATION_FOG_RES };
+      String[] topicsInvitation = { ACCEPT_INVITATION_RES };
 
       new ListenerConnection(
         this,
@@ -103,7 +97,7 @@ public class ControllerImpl implements Controller {
       this.MQTTClientHost.publish(CREDENTIAL_DEFINITIONS, payload, QOS);
       
     } else {
-      String[] topics = { SEND_INVITATION, ACCEPT_INVITATION_RES };
+      String[] topics = { CREATE_INVITATION_RES };
 
       new ListenerInvitation(
         this,
@@ -118,7 +112,7 @@ public class ControllerImpl implements Controller {
         .format("%s:%s", MQTTClientHost.getIp(), MQTTClientHost.getPort())
         .getBytes();
 
-      this.MQTTClientUp.publish(CONNECT, payload, QOS);
+      this.MQTTClientHost.publish(CREATE_INVITATION, payload, QOS);
     }
   }
 
@@ -132,17 +126,13 @@ public class ControllerImpl implements Controller {
         .getBytes();
 
       this.MQTTClientUp.publish(DISCONNECT, payload, QOS);
+      this.MQTTClientHost.unsubscribe(CREATE_INVITATION_RES);
 
-      // this.MQTTClientUp.unsubscribe(TOP_K);
-      // this.MQTTClientUp.unsubscribe(SENSORS);
     } else {
-      // this.MQTTClientUp.unsubscribe(TOP_K_FOG);
-      // this.MQTTClientUp.unsubscribe(SENSORS_FOG);
       this.MQTTClientUp.unsubscribe(CONNECT);
       this.MQTTClientUp.unsubscribe(DISCONNECT);
-      // this.MQTTClientHost.unsubscribe(TOP_K_RES);
-      // this.MQTTClientHost.unsubscribe(INVALID_TOP_K);
-      // this.MQTTClientHost.unsubscribe(SENSORS_RES);
+      this.MQTTClientHost.unsubscribe(CREDENTIAL_DEFINITIONS_RES);
+      this.MQTTClientHost.unsubscribe(ACCEPT_INVITATION_RES);
     }
 
     this.MQTTClientHost.disconnect();
