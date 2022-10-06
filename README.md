@@ -35,6 +35,12 @@ Assim que um _fog gateway_ se conectar a um _edge gateway_, o _fog gateway_ envi
 
 ### `Emissão de Credencial`
 
-O _fog gateway_ envia uma publicação MQTT para o Agent Aries Controller com objetivo do mesmo emitir uma credencial para um agente de um _edge gateway_.
+O _fog gateway_ envia uma publicação MQTT para o Agent Aries Controller com objetivo do mesmo emitir uma credencial verificável para um agente de um _edge gateway_.
+
+---
+
+### `Solicitação de Prova`
+
+Antes de armazenar os dados recebidos de _edge gateways_, o _fog gateway_ envia uma publicação MQTT para o Agent Aries Controller para fazer uma solicitação de prova de credencial para o agente do _edge gateway_, com o objetivo de garantir o armazenamento dos dados enviados por _gateways_ autorizados. Caso o _edge gateway_ esteja autorizado, ou seja, possua uma credencial verificável, o _fog gateway_ armazena os dados recebidos. Caso contrário, o _fog gateway_ rejeita os dados recebidos.
 
 ---
